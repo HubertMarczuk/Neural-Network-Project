@@ -13,14 +13,12 @@ def Eprime(d,y):
     return -2*(d-y)
 
 def TotalEnergy(x1, d, w, eps, alfa, mode, iterations):
-    energy_hist = []
-    stop = False
+    energy_hist = [[],[],[]]
     counter = 0
-    while(stop == False):
-        if mode == True:
-            if counter >= iterations:
-                break
-        for k in range(4):
+    while(True):
+        energy_sum = 0
+        grad_sum = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        for k in range(3):
             x2 = [1]
             for i in range(2):
                 sum = 0
@@ -33,27 +31,30 @@ def TotalEnergy(x1, d, w, eps, alfa, mode, iterations):
                 sum += w[2][i]*x2[i]
             x3 = F(sum)
             energy = E(d,x3)
-            energy_hist.append(energy)
-            if mode == False:
-                if energy <= eps:
-                    stop = True
-                    break
+            energy_hist[k].append(energy)
+            energy_sum += energy
             grad = Propagation(w, x1[k], x2, x3, d)
             for i in range(3):
                 for j in range(3):
-                    w[i][j] = w[i][j] - alfa*grad[i][j]
-            counter +=1
+                    grad_sum[i][j] += grad[i][j]
+        for i in range(3):
+            for j in range(3):
+                w[i][j] = w[i][j] - alfa*grad_sum[i][j]
+        counter += 1
+        if mode == True:
+            if energy_sum <= eps:
+                break
+        else:
+            if counter >= iterations:
+                break
     return energy_hist
 
 def PartialEnergy(w, x1, d, eps, alfa, mode, iterations):
-    energy_hist = []
-    stop = False
+    energy_hist = [[],[],[]]
     counter = 0
-    while(stop == False):
-        if mode == False:
-            if counter >= iterations:
-                break
-        for k in range(4):
+    while(True):
+        energy_sum = 0
+        for k in range(3):
             x2 = [1]
             for i in range(2):
                 sum = 0
@@ -66,16 +67,19 @@ def PartialEnergy(w, x1, d, eps, alfa, mode, iterations):
                 sum += w[2][i]*x2[i]
             x3 = F(sum)
             energy = E(d,x3)
-            energy_hist.append(energy)
-            if mode == True:
-                if energy <= eps:
-                    stop = True
-                    break
+            energy_hist[k].append(energy)
+            energy_sum += energy
             grad = Propagation(w, x1[k], x2, x3, d)
             for i in range(3):
                 for j in range(3):
                     w[i][j] = w[i][j] - alfa*grad[i][j]
             counter +=1
+        if mode == True:
+            if energy_sum <= eps:
+                break
+        else:
+            if counter >= iterations:
+                break
     return energy_hist
 
 def Propagation(w, x1, x2, x3, d):
