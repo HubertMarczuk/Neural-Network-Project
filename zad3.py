@@ -50,7 +50,7 @@ def TotalEnergy(x1, d, w, eps, alfa, mode, iterations):
     return energy_hist
 
 def PartialEnergy(w, x1, d, eps, alfa, mode, iterations):
-    energy_hist = [[],[],[]]
+    energy_hist = []
     counter = 0
     while(True):
         energy_sum = 0
@@ -67,7 +67,7 @@ def PartialEnergy(w, x1, d, eps, alfa, mode, iterations):
                 sum += w[2][i]*x2[i]
             x3 = F(sum)
             energy = E(d,x3)
-            energy_hist[k].append(energy)
+            energy_hist.append(energy)
             energy_sum += energy
             grad = Propagation(w, x1[k], x2, x3, d)
             for i in range(3):
