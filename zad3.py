@@ -18,7 +18,7 @@ def TotalEnergy(x1, d, w, eps, alfa, mode, iterations):
     while(True):
         energy_sum = 0
         grad_sum = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
-        for k in range(3):
+        for k in range(4):
             x2 = [1]
             for i in range(2):
                 sum = 0
@@ -54,7 +54,7 @@ def PartialEnergy(w, x1, d, eps, alfa, mode, iterations):
     counter = 0
     while(True):
         energy_sum = 0
-        for k in range(3):
+        for k in range(4):
             x2 = [1]
             for i in range(2):
                 sum = 0
