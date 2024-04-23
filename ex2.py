@@ -21,17 +21,17 @@ def CheckStabilization(weight):
 def Synchronous(weight, v, threshold, activation_type, low_value, high_value):
     v_histories = []
     for i in range(len(v)):
-        v_histories.append(Synchronous_a(weight, v[i], threshold, activation_type, low_value, high_value))
+        v_histories.append(Synchronous_a(weight, v[i][:], threshold, activation_type, low_value, high_value))
     return v_histories
 
 def Synchronous_a(weight, v, threshold, activation_type, low_value, high_value):
     v_history = []
-    v_history.append(v)
+    v_history.append(v[:])
     while True:
         u = MatrixMultipliesvector(weight,v)
         for i in range(len(u)):
             v[i] = ActivationFunction(u[i], threshold, activation_type, low_value, high_value)
-        v_history.append(v)
+        v_history.append(v[:])
         stop = False
         for i in range(len(v_history)-1):
             repeat = True
@@ -48,8 +48,35 @@ def Synchronous_a(weight, v, threshold, activation_type, low_value, high_value):
             break
     return v_history
         
-def Asynchronous():
-    k=0
+def Asynchronous(weight, v, threshold, activation_type, low_value, high_value):
+    v_histories = []
+    for i in range(len(v)):
+        v_histories.append(Asynchronous_a(weight, v[i][:], threshold, activation_type, low_value, high_value))
+    return v_histories
+
+def Asynchronous_a(weight, v, threshold, activation_type, low_value, high_value):
+    v_history = []
+    v_history.append(v[:])
+    while True:
+        u = MatrixMultipliesvector(weight,v)
+        for i in range(len(u)):
+            v[i] = ActivationFunction(u[i], threshold, activation_type, low_value, high_value)
+            v_history.append(v[:])
+        stop = False
+        for i in range(len(v_history)-1):
+            repeat = True
+            for j in range(len(v)):
+                if v[j] != v_history[i][j]:
+                    repeat = False
+                    break
+            if len(v_history) == 1:
+                repeat = False
+            if repeat == True:
+                stop = True
+                break
+        if stop == True:
+            break
+    return v_history
 
 def MatrixMultipliesvector(M,v):
     u = []
@@ -59,6 +86,12 @@ def MatrixMultipliesvector(M,v):
             sum+=M[i][j]*v[j]
         u.append(sum)
     return u
+
+def DotProduct(v1,v2):
+    sum = 0
+    for i in range(len(v1)):
+        sum += v1[i] * v2[i]
+    return sum
 
 def ActivationFunction(x, threshold, activation_type, low_value, high_value):
     if activation_type == False:
@@ -74,27 +107,30 @@ def ActivationFunction(x, threshold, activation_type, low_value, high_value):
         
 def PrintHistories(v_histories):
     for i in range(len(v_histories)):
-        for j in range(len(v_histories[0])):
+        for j in range(len(v_histories[i])):
             print(v_histories[i][j])
         print()
         
 
-weight = [[0, -1, 1],
-          [-1, 0, 0.5],
-          [1, 0.5, 0]]
+weight = [[0, -2/3, 2/3],
+          [-2/3, 0, -2/3],
+          [2/3, -2/3, 0]]
 
-v_values = [0,1]
+v_values = [-1,1]
 
 v = GenerateVectors(v_values,len(weight[0]))
 
 threshold = 0
 
-activation_type = True                  #True(< and >=), False(<= and >)
+activation_type = False                  #True(< and >=), False(<= and >)
 
-low_value = 0
+low_value = -1
 
 high_value = 1
 
 #CheckStabilization(weight)
-sync = Synchronous(weight, v, threshold, activation_type, low_value, high_value)
-PrintHistories(sync)
+#sync = Synchronous(weight, v, threshold, activation_type, low_value, high_value)
+#PrintHistories(sync)
+
+a_sync = Asynchronous(weight, v, threshold, activation_type, low_value, high_value)
+PrintHistories(a_sync)
