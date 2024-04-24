@@ -58,22 +58,23 @@ def Asynchronous_a(weight, v, threshold, activation_type, low_value, high_value)
     v_history = []
     v_history.append(v[:])
     while True:
-        u = MatrixMultipliesvector(weight,v)
-        for i in range(len(u)):
-            v[i] = ActivationFunction(u[i], threshold, activation_type, low_value, high_value)
+        for i in range(len(v)):
+            u = DotProduct(weight[i],v)
+            v[i] = ActivationFunction(u, threshold, activation_type, low_value, high_value)
             v_history.append(v[:])
         stop = False
         for i in range(len(v_history)-1):
-            repeat = True
-            for j in range(len(v)):
-                if v[j] != v_history[i][j]:
+            if i%len(v)==0:
+                repeat = True
+                for j in range(len(v)):
+                    if v[j] != v_history[i][j]:
+                        repeat = False
+                        break
+                if len(v_history) == 1:
                     repeat = False
+                if repeat == True:
+                    stop = True
                     break
-            if len(v_history) == 1:
-                repeat = False
-            if repeat == True:
-                stop = True
-                break
         if stop == True:
             break
     return v_history
@@ -112,9 +113,15 @@ def PrintHistories(v_histories):
         print()
         
 
-weight = [[0, -2/3, 2/3],
-          [-2/3, 0, -2/3],
-          [2/3, -2/3, 0]]
+# weight = [[0, -2/3, 2/3],
+#           [-2/3, 0, -2/3],
+#           [2/3, -2/3, 0]]
+
+weight = [[-1, 3/4],
+          [4/3, 0]]
+
+# weight = [[0, 1],
+#          [-1, 0]]
 
 v_values = [-1,1]
 
@@ -122,9 +129,9 @@ v = GenerateVectors(v_values,len(weight[0]))
 
 threshold = 0
 
-activation_type = False                  #True(< and >=), False(<= and >)
+activation_type = True                  #True(< and >=), False(<= and >)
 
-low_value = -1
+low_value = 0
 
 high_value = 1
 
