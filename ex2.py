@@ -90,17 +90,17 @@ def CheckStabilizationAsync(weight):
         print("Oba warunki spełnione!")
         print("Sieć powinna się ustabilizować na jednym stanie.")
 
-def Synchronous(weight, v, threshold, activation_type, low_value, high_value):
+def Synchronous(weight, v, threshold, activation_type, low_value, high_value, bias):
     v_histories = []
     for i in range(len(v)):
-        v_histories.append(Synchronous_a(weight, v[i][:], threshold, activation_type, low_value, high_value))
+        v_histories.append(Synchronous_a(weight, v[i][:], threshold, activation_type, low_value, high_value, bias))
     return v_histories
 
-def Synchronous_a(weight, v, threshold, activation_type, low_value, high_value):
+def Synchronous_a(weight, v, threshold, activation_type, low_value, high_value, bias):
     v_history = []
     v_history.append(v[:])
     while True:
-        u = MatrixMultipliesvector(weight,v)
+        u = MatrixMultipliesvector(weight,v,bias)
         for i in range(len(u)):
             v[i] = ActivationFunction(u[i], threshold, activation_type, low_value, high_value)
         v_history.append(v[:])
@@ -120,18 +120,18 @@ def Synchronous_a(weight, v, threshold, activation_type, low_value, high_value):
             break
     return v_history
         
-def Asynchronous(weight, v, threshold, activation_type, low_value, high_value):
+def Asynchronous(weight, v, threshold, activation_type, low_value, high_value, bias):
     v_histories = []
     for i in range(len(v)):
-        v_histories.append(Asynchronous_a(weight, v[i][:], threshold, activation_type, low_value, high_value))
+        v_histories.append(Asynchronous_a(weight, v[i][:], threshold, activation_type, low_value, high_value, bias))
     return v_histories
 
-def Asynchronous_a(weight, v, threshold, activation_type, low_value, high_value):
+def Asynchronous_a(weight, v, threshold, activation_type, low_value, high_value, bias):
     v_history = []
     v_history.append(v[:])
     while True:
         for i in range(len(v)):
-            u = DotProduct(weight[i],v)
+            u = DotProduct(weight[i],v,bias[i])
             v[i] = ActivationFunction(u, threshold, activation_type, low_value, high_value)
             v_history.append(v[:])
         stop = False
@@ -151,20 +151,20 @@ def Asynchronous_a(weight, v, threshold, activation_type, low_value, high_value)
             break
     return v_history
 
-def MatrixMultipliesvector(M,v):
+def MatrixMultipliesvector(M, v, bias):
     u = []
     for i in range(len(v)):
         sum = 0
         for j in range(len(v)):
             sum+=M[i][j]*v[j]
-        u.append(sum)
+        u.append(sum+bias[i])
     return u
 
-def DotProduct(v1,v2):
+def DotProduct(v1, v2, bias):
     sum = 0
     for i in range(len(v1)):
         sum += v1[i] * v2[i]
-    return sum
+    return sum + bias
 
 def ActivationFunction(x, threshold, activation_type, low_value, high_value):
     if activation_type == False:
@@ -235,6 +235,10 @@ def PrintHistoriesAsync(v_histories):
 weight = [[0, 1],
           [-1, 0]]
 
+bias = [0, 0]
+
+#bias = [0, 0, 0]
+
 v_values = [-1, 1]
 
 v = GenerateVectors(v_values,len(weight[0]))
@@ -248,9 +252,9 @@ low_value = -1
 high_value = 1
 
 CheckStabilizationSync(weight)
-sync = Synchronous(weight, v, threshold, activation_type, low_value, high_value)
+sync = Synchronous(weight, v, threshold, activation_type, low_value, high_value, bias)
 PrintHistoriesSync(sync)
 
 #CheckStabilizationAsync(weight)
-#a_sync = Asynchronous(weight, v, threshold, activation_type, low_value, high_value)
+#a_sync = Asynchronous(weight, v, threshold, activation_type, low_value, high_value, bias)
 #PrintHistoriesAsync(a_sync)
