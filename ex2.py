@@ -6,17 +6,89 @@ def GenerateVectors(v_values, length):
     return v
 
 
-def CheckStabilization(weight):
+def CheckStabilizationSync(weight):
+    req1 = True
+    req2 = True
+    req3 = True
     for i in range(len(weight[0])):
-        if weight[i][i]==0:
-            print("Warunek 1) niespełniony. Macierz wag nie ma wartości 0 na wszystkich elementach diagonali!!!")
+        if weight[i][i]<0:
+            print("Warunek 1) niespełniony. Macierz wag nie ma nieujemnych wartości na wszystkich elementach diagonali!")
+            print("Energia może być rosnąca.")
+            req2 = False
             break
     for i in range(len(weight[0])):
+        stop = False
         for j in range(i):
             if weight[i][j]!=weight[j][i]:
-                print("Warunek 2) niespełniony. Macierz wag nie jest macierzą symetryczną!!!")
+                print("Warunek 2) niespełniony. Macierz wag nie jest macierzą symetryczną!")
+                print("Sieć może wpaść w wielookresowy cykl.")
+                req2 = False
+                stop = True
                 break
+        if stop == True:
+            break
+    if len(weight)==2:
+        if weight[0][0]<=0 or weight[0][0]*weight[1][1]-weight[1][0]*weight[0][1]<=0:
+            req3 = False
+    if len(weight)==3:
+        deter = weight[0][0]*weight[1][1]*weight[2][2]
+        deter+= weight[1][0]*weight[2][1]*weight[0][2]
+        deter+= weight[2][0]*weight[0][1]*weight[1][2]
+        deter-= weight[2][0]*weight[1][1]*weight[0][2]
+        deter-= weight[0][0]*weight[2][1]*weight[1][2]
+        deter-= weight[1][0]*weight[0][1]*weight[2][2]
+        if weight[0][0]<=0 or weight[0][0]*weight[1][1]-weight[1][0]*weight[0][1]<=0 or deter<=0:
+            req3 = False
+    
+    if req1 == True:
+        print("Warunek 1) spełniony. Wszystkie wartości na diagonali są nieujemne!")
+    if req2 == True:
+        print("Warunek 2) spełniony. Macierz wag jest macierzą symetryczną!")
+        print("Sieć ustabilizuje się na jednym stanie lub wpadnie w dwuokresowy cykl.")
+    if req3 == False:
+        print("Warunek 3) niespełniony. Macierz wag nie jest dodatnio określona!")
+        print("Sieć może wpaść w wielookresowy cykl.")
+    else:
+        print("Warunek 3) spełniony. Macierz wag dodatnio określona!")
+        print("Sieć może się ustabilizować na jednym stanie.")
+    if req1 == True and req2 == True and req3 == False:
+        print("Warunki 1) oraz 2) spełniony, a 3) nie!")
+        print("Sieć ustabilizuje się na jednym stanie lub wpadnie w dwuokresowy cykl.")
+    if req1 == True and req2 == True and req3 == True:
+        print("Wszystkie warunki spełnione!")
+        print("Sieć powinna się ustabilizować na jednym stanie. Energia niemalejąca.")
 
+
+
+def CheckStabilizationAsync(weight):
+    req1 = True
+    req2 = True
+    for i in range(len(weight[0])):
+        if weight[i][i]<0:
+            print("Warunek 1) niespełniony. Macierz wag nie ma nieujemnych wartości na wszystkich elementach diagonali!")
+            print("Energia może być rosnąca.")
+            req2 = False
+            break
+    for i in range(len(weight[0])):
+        stop = False
+        for j in range(i):
+            if weight[i][j]!=weight[j][i]:
+                print("Warunek 2) niespełniony. Macierz wag nie jest macierzą symetryczną!")
+                print("Sieć może wpaść w wielookresowy cykl.")
+                req2 = False
+                stop = True
+                break
+        if stop == True:
+            break
+    if req1 == True:
+        print("Warunek 1) spełniony. Wszystkie wartości na diagonali są nieujemne!")
+        print("Energia będzie niemalejąca.")
+    if req2 == True:
+        print("Warunek 2) spełniony. Macierz wag jest macierzą symetryczną!")
+        print("Sieć ustabilizuje się na jednym stanie lub wpadnie w dwuokresowy cykl.")
+    if req1 == True and req2 == True:
+        print("Oba warunki spełnione!")
+        print("Sieć powinna się ustabilizować na jednym stanie.")
 
 def Synchronous(weight, v, threshold, activation_type, low_value, high_value):
     v_histories = []
@@ -106,38 +178,79 @@ def ActivationFunction(x, threshold, activation_type, low_value, high_value):
         else:
             return high_value
         
-def PrintHistories(v_histories):
+def PrintHistoriesSync(v_histories):
     for i in range(len(v_histories)):
         for j in range(len(v_histories[i])):
             print(v_histories[i][j])
+        states = 0
+        for j in range(len(v_histories[i])):
+            same = True
+            for k in range(len(v_histories[i][j])):
+                if v_histories[i][j][k] != v_histories[i][len(v_histories[i])-1][k]:
+                    same = False
+                    break
+            states += 1
+            if same == True:
+                break
+        states = len(v_histories[i])-states
+        if states == 1:
+            print("Wektor stabilizuje się na jednym stanie.")
+        else:
+            print("Wektor posiada", states, "okresową konfigurację.")
+        print()
+
+
+def PrintHistoriesAsync(v_histories):
+    for i in range(len(v_histories)):
+        for j in range(len(v_histories[i])):
+            print(v_histories[i][j])
+            if j%len(v_histories[i][j])==0:
+                print("-------")
+        states = 0
+        for j in range(len(v_histories[i])):
+            same = True
+            if j%len(v_histories[i][j])==0:
+                for k in range(len(v_histories[i][j])):
+                    if v_histories[i][j][k] != v_histories[i][len(v_histories[i])-1][k]:
+                        same = False
+                        break
+                states += 1
+                if same == True:
+                    break
+        states = int((len(v_histories[i])-1)/len(v_histories[i][0])+1)-states
+        if states == 1:
+            print("Wektor stabilizuje się na jednym stanie.")
+        else:
+            print("Wektor posiada", states, "okresową konfigurację.")
         print()
         
 
-# weight = [[0, -2/3, 2/3],
-#           [-2/3, 0, -2/3],
-#           [2/3, -2/3, 0]]
+#weight = [[0, -2/3, 2/3],
+#          [-2/3, 0, -2/3],
+#          [2/3, -2/3, 0]]
 
-weight = [[-1, 3/4],
-          [4/3, 0]]
+#weight = [[-1, 3/4],
+#          [3/4, 0]]
 
-# weight = [[0, 1],
-#          [-1, 0]]
+weight = [[0, 1],
+          [-1, 0]]
 
-v_values = [-1,1]
+v_values = [-1, 1]
 
 v = GenerateVectors(v_values,len(weight[0]))
 
 threshold = 0
 
-activation_type = True                  #True(< and >=), False(<= and >)
+activation_type = False      #True(< and >=), False(<= and >)
 
-low_value = 0
+low_value = -1
 
 high_value = 1
 
-#CheckStabilization(weight)
-#sync = Synchronous(weight, v, threshold, activation_type, low_value, high_value)
-#PrintHistories(sync)
+CheckStabilizationSync(weight)
+sync = Synchronous(weight, v, threshold, activation_type, low_value, high_value)
+PrintHistoriesSync(sync)
 
-a_sync = Asynchronous(weight, v, threshold, activation_type, low_value, high_value)
-PrintHistories(a_sync)
+#CheckStabilizationAsync(weight)
+#a_sync = Asynchronous(weight, v, threshold, activation_type, low_value, high_value)
+#PrintHistoriesAsync(a_sync)
