@@ -120,12 +120,15 @@ alfa = 0.5
 
 eps = 0.001
 
-eps_mode = False
+eps_mode = True
 
 iterations = 6000
 
-#energy_part = PartialEnergy(w, x1, d, eps, alfa, eps_mode, iterations)
-energy_total = TotalEnergy(w, x1, d, eps, alfa, eps_mode, iterations)
+mode = True                    #False(total energy), True(partial energy)
 
-#Plot(energy_part)
-Plot(energy_total)
+if mode == True:
+    energy_part = PartialEnergy(w, x1, d, eps, alfa, eps_mode, iterations)
+    Plot(energy_part)
+else:
+    energy_total = TotalEnergy(w, x1, d, eps, alfa, eps_mode, iterations)
+    Plot(energy_total)

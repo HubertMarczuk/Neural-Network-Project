@@ -56,7 +56,7 @@ def CheckStabilizationSync(weight):
         print("Sieć ustabilizuje się na jednym stanie lub wpadnie w dwuokresowy cykl.")
     if req1 == True and req2 == True and req3 == True:
         print("Wszystkie warunki spełnione!")
-        print("Sieć powinna się ustabilizować na jednym stanie. Energia niemalejąca.")
+        print("Sieć powinna się ustabilizować na jednym stanie. Energia nierosnąca.")
 
 
 
@@ -82,7 +82,7 @@ def CheckStabilizationAsync(weight):
             break
     if req1 == True:
         print("Warunek 1) spełniony. Wszystkie wartości na diagonali są nieujemne!")
-        print("Energia będzie niemalejąca.")
+        print("Energia będzie nierosnąca.")
     if req2 == True:
         print("Warunek 2) spełniony. Macierz wag jest macierzą symetryczną!")
         print("Sieć ustabilizuje się na jednym stanie lub wpadnie w dwuokresowy cykl.")
@@ -100,7 +100,7 @@ def Synchronous_a(weight, v, threshold, activation_type, low_value, high_value, 
     v_history = []
     v_history.append(v[:])
     while True:
-        u = MatrixMultipliesvector(weight,v,bias)
+        u = MatrixMultipliesVector(weight,v,bias)
         for i in range(len(u)):
             v[i] = ActivationFunction(u[i], threshold, activation_type, low_value, high_value)
         v_history.append(v[:])
@@ -151,7 +151,7 @@ def Asynchronous_a(weight, v, threshold, activation_type, low_value, high_value,
             break
     return v_history
 
-def MatrixMultipliesvector(M, v, bias):
+def MatrixMultipliesVector(M, v, bias):
     u = []
     for i in range(len(v)):
         sum = 0
@@ -251,10 +251,13 @@ low_value = -1
 
 high_value = 1
 
-CheckStabilizationSync(weight)
-sync = Synchronous(weight, v, threshold, activation_type, low_value, high_value, bias)
-PrintHistoriesSync(sync)
+mode = True                  #True(synchronous), False(asynchronous)
 
-#CheckStabilizationAsync(weight)
-#a_sync = Asynchronous(weight, v, threshold, activation_type, low_value, high_value, bias)
-#PrintHistoriesAsync(a_sync)
+if mode == True: 
+    CheckStabilizationSync(weight)
+    sync = Synchronous(weight, v, threshold, activation_type, low_value, high_value, bias)
+    PrintHistoriesSync(sync)
+else:
+    CheckStabilizationAsync(weight)
+    a_sync = Asynchronous(weight, v, threshold, activation_type, low_value, high_value, bias)
+    PrintHistoriesAsync(a_sync)
